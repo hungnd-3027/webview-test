@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebView Test</title>
+
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 24px;
+        }
+git remote add origin git@github-work:hungnd-3027/webview-test.git
+        button {
+          padding: 12px 20px;
+          margin-top: 12px;
+          font-size: 16px;
+        }
+
+        #log {
+          margin-top: 24px;
+          padding: 16px;
+          background: #f4f4f4;
+          border-radius: 8px;
+          white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+<h1>WebView Test Page</h1>
+
+<p id="userAgent"></p>
+
+<button onclick="showAlert()">
+    Test JavaScript
+</button>
+
+<button onclick="changeUrl()">
+    Test Navigation
+</button>
+
+<div id="log">
+    WebView loaded successfully.
+</div>
+
+<script>
+    document.getElementById("userAgent").innerText =
+      "User Agent: " + navigator.userAgent;
+
+    function showAlert() {
+      alert("JavaScript works!");
+    }
+
+    function changeUrl() {
+      window.location.href = "https://example.com";
+    }
+</script>
+</body>
+</html>
