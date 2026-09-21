@@ -1,59 +1,179 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebView Test</title>
+    <title>WebView Link Test</title>
 
     <style>
+        * {
+          box-sizing: border-box;
+        }
+
         body {
           font-family: Arial, sans-serif;
+          margin: 0;
           padding: 24px;
+          background: #f5f5f5;
+          color: #222;
         }
+
+        .container {
+          max-width: 720px;
+          margin: 0 auto;
+          background: #fff;
+          padding: 24px;
+          border-radius: 12px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+          margin-top: 0;
+          font-size: 24px;
+        }
+
+        .input-row {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 24px;
+        }
+
+        input {
+          flex: 1;
+          min-width: 0;
+          padding: 12px;
+          font-size: 16px;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+        }
+
         button {
-          padding: 12px 20px;
-          margin-top: 12px;
+          padding: 12px 18px;
+          font-size: 16px;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+
+        #addButton {
+          background: #222;
+          color: #fff;
+        }
+
+        ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        li {
+          padding: 12px 0;
+          border-bottom: 1px solid #eee;
+          word-break: break-all;
+        }
+
+        a {
+          color: #0969da;
+          text-decoration: underline;
           font-size: 16px;
         }
 
-        #log {
-          margin-top: 24px;
-          padding: 16px;
-          background: #f4f4f4;
-          border-radius: 8px;
-          white-space: pre-wrap;
+        .empty {
+          color: #777;
         }
     </style>
 </head>
 
 <body>
-<h1>WebView Test Page</h1>
+<div class="container">
+    <h1>WebView Link Test</h1>
 
-<p id="userAgent"></p>
+    <div class="input-row">
+        <input
+                id="urlInput"
+                type="text"
+                placeholder="Nhập URL, ví dụ: https://example.com hoặc myapp://detail/123"
+                autocomplete="off"
+        />
+        <button id="addButton">Thêm</button>
+    </div>
 
-<button onclick="showAlert()">
-    Test JavaScript
-</button>
-
-<button onclick="changeUrl()">
-    Test Navigation
-</button>
-
-<div id="log">
-    WebView loaded successfully.
+    <div id="emptyState" class="empty">Chưa có link nào.</div>
+    <ul id="linkList"></ul>
 </div>
 
 <script>
-    document.getElementById("userAgent").innerText =
-      "User Agent: " + navigator.userAgent;
+    const STORAGE_KEY = "webview_test_links";
 
-    function showAlert() {
-      alert("JavaScript works!");
+    const urlInput = document.getElementById("urlInput");
+    const addButton = document.getElementById("addButton");
+    const linkList = document.getElementById("linkList");
+    const emptyState = document.getElementById("emptyState");
+
+    let links = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+    function normalizeUrl(value) {
+      const url = value.trim();
+
+      if (!url) {
+        return "";
+      }
+
+      // Giữ nguyên các scheme để test deep link/custom scheme:
+      // myapp://..., tel:..., mailto:..., intent://...
+      if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(url)) {
+        return url;
+      }
+
+      // Nếu chỉ nhập domain thì mặc định dùng HTTPS.
+      return "https://" + url;
     }
 
-    function changeUrl() {
-      window.location.href = "https://example.com";
+    function saveLinks() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
     }
+
+    function renderLinks() {
+      linkList.innerHTML = "";
+      emptyState.style.display = links.length === 0 ? "block" : "none";
+
+      links.forEach((url) => {
+        const li = document.createElement("li");
+        const anchor = document.createElement("a");
+
+        anchor.href = url;
+        anchor.textContent = url;
+
+        // Không dùng target="_blank" để navigation xảy ra ngay trong WebView hiện tại.
+        li.appendChild(anchor);
+        linkList.appendChild(li);
+      });
+    }
+
+    function addLink() {
+      const url = normalizeUrl(urlInput.value);
+
+      if (!url) {
+        return;
+      }
+
+      links.push(url);
+      saveLinks();
+      renderLinks();
+
+      urlInput.value = "";
+      urlInput.focus();
+    }
+
+    addButton.addEventListener("click", addLink);
+
+    urlInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        addLink();
+      }
+    });
+
+    renderLinks();
 </script>
 </body>
 </html>
